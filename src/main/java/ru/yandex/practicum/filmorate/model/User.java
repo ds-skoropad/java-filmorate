@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class User {
     Long id;
-    @Email
+    @Email(message = "должно иметь формат адреса электронной почты")
     String email;
     @NotBlank(message = "Логин пользователя не может быть пустым и содержать пробелы")
     String login;
