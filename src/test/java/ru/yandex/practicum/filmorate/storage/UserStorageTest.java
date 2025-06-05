@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.NotValidException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -22,7 +20,8 @@ public abstract class UserStorageTest<V extends UserStorage> {
         final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
                 LocalDate.of(2000, 1, 1)));
 
-        assertEquals(user, userStorage.findById(user.getId()));
+        assertTrue(userStorage.findById(user.getId()).isPresent());
+        assertEquals(user, userStorage.findById(user.getId()).get());
     }
 
     @Test
@@ -32,7 +31,8 @@ public abstract class UserStorageTest<V extends UserStorage> {
         final User updateUser = userStorage.create(new User(1L, "test2@email.ru", "login2", "name2",
                 LocalDate.of(2002, 2, 2)));
 
-        assertEquals(updateUser, userStorage.findById(updateUser.getId()));
+        assertTrue(userStorage.findById(updateUser.getId()).isPresent());
+        assertEquals(updateUser, userStorage.findById(updateUser.getId()).get());
     }
 
     @Test
@@ -50,16 +50,8 @@ public abstract class UserStorageTest<V extends UserStorage> {
         final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
                 LocalDate.of(2000, 1, 1)));
 
-        assertEquals(user, userStorage.findById(user.getId()));
-    }
-
-    @Test
-    void containsIdShouldBeCorrect() {
-        final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1)));
-
-        assertEquals(1L, user.getId());
-        assertTrue(userStorage.containsId(1L));
+        assertTrue(userStorage.findById(user.getId()).isPresent());
+        assertEquals(user, userStorage.findById(user.getId()).get());
     }
 
     @Test
@@ -122,58 +114,6 @@ public abstract class UserStorageTest<V extends UserStorage> {
         user3.getFriends().add(user2.getId());
 
         assertEquals(List.of(user2), userStorage.friendCommon(user1.getId(), user3.getId()));
-    }
-
-    // Exceptions
-
-    @Test
-    void findByIdShouldBeExceptionForNotFoundId() {
-        assertThrows(NotFoundException.class, () -> userStorage.findById(100L));
-    }
-
-    @Test
-    void updateShouldBeExceptionForNotCorrectId() {
-        final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1)));
-        user.setId(10L);
-
-        assertThrows(NotFoundException.class, () -> userStorage.update(user));
-    }
-
-    @Test
-    void friendAddShouldBeExceptionNotFoundId() {
-        assertThrows(NotFoundException.class, () -> userStorage.friendAdd(1L, 2L));
-
-        final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1)));
-
-        assertThrows(NotFoundException.class, () -> userStorage.friendAdd(1L, 2L));
-    }
-
-    @Test
-    void friendAddShouldBeExceptionForSomeId() {
-        final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1)));
-
-        assertThrows(NotValidException.class, () -> userStorage.friendAdd(1L, 1L));
-    }
-
-    @Test
-    void friendRemoveShouldBeExceptionNotFoundId() {
-        assertThrows(NotFoundException.class, () -> userStorage.friendRemove(1L, 2L));
-
-        final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1)));
-
-        assertThrows(NotFoundException.class, () -> userStorage.friendRemove(1L, 2L));
-    }
-
-    @Test
-    void friendRemoveShouldBeExceptionForSomeId() {
-        final User user = userStorage.create(new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1)));
-
-        assertThrows(NotValidException.class, () -> userStorage.friendRemove(1L, 1L));
     }
 
     // Additional tests

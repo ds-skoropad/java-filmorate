@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class FilmStorageTest<V extends FilmStorage> {
     V filmStorage;
@@ -21,7 +21,8 @@ public abstract class FilmStorageTest<V extends FilmStorage> {
         final Film film = filmStorage.create(new Film(1L, "Name", "Description",
                 LocalDate.of(2000, 1, 1), 100));
 
-        assertEquals(film, filmStorage.findById(film.getId()));
+        assertTrue(filmStorage.findById(film.getId()).isPresent());
+        assertEquals(film, filmStorage.findById(film.getId()).get());
     }
 
     @Test
@@ -31,7 +32,8 @@ public abstract class FilmStorageTest<V extends FilmStorage> {
         final Film updateFilm = filmStorage.update(new Film(1L, "Name 2", "Description 2",
                 LocalDate.of(2002, 2, 2), 200));
 
-        assertEquals(updateFilm, filmStorage.findById(updateFilm.getId()));
+        assertTrue(filmStorage.findById(updateFilm.getId()).isPresent());
+        assertEquals(updateFilm, filmStorage.findById(updateFilm.getId()).get());
     }
 
     @Test
@@ -49,16 +51,8 @@ public abstract class FilmStorageTest<V extends FilmStorage> {
         final Film film = filmStorage.create(new Film(1L, "Name", "Description",
                 LocalDate.of(2000, 1, 1), 100));
 
-        assertEquals(film, filmStorage.findById(film.getId()));
-    }
-
-    @Test
-    void containsIdShouldBeCorrect() {
-        final Film film = filmStorage.create(new Film(1L, "Name", "Description",
-                LocalDate.of(2000, 1, 1), 100));
-
-        assertEquals(1L, film.getId());
-        assertTrue(filmStorage.containsId(1L));
+        assertTrue(filmStorage.findById(film.getId()).isPresent());
+        assertEquals(film, filmStorage.findById(film.getId()).get());
     }
 
     @Test
@@ -95,32 +89,6 @@ public abstract class FilmStorageTest<V extends FilmStorage> {
         assertEquals(List.of(film3, film2, film1), filmStorage.findPopular(10L).stream().toList());
         assertEquals(List.of(film3, film2, film1), filmStorage.findPopular(3L).stream().toList());
         assertEquals(List.of(film3, film2), filmStorage.findPopular(2L).stream().toList());
-    }
-
-    // Exceptions
-
-    @Test
-    void findByIdShouldBeExceptionForNotFoundId() {
-        assertThrows(NotFoundException.class, () -> filmStorage.findById(100L));
-    }
-
-    @Test
-    void likeOnShouldBeExceptionForNotFoundId() {
-        assertThrows(NotFoundException.class, () -> filmStorage.likeOn(100L, 1L));
-    }
-
-    @Test
-    void likeOffShouldBeExceptionForNotFoundId() {
-        assertThrows(NotFoundException.class, () -> filmStorage.likeOff(100L, 1L));
-    }
-
-    @Test
-    void updateShouldBeExceptionForNotCorrectId() {
-        final Film film = filmStorage.create(new Film(1L, "Name", "Description",
-                LocalDate.of(2000, 1, 1), 100));
-        film.setId(10L);
-
-        assertThrows(NotFoundException.class, () -> filmStorage.update(film));
     }
 
     // Additional tests

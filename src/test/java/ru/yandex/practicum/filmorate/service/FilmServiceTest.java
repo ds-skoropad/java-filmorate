@@ -30,19 +30,17 @@ class FilmServiceTest {
         filmService = new FilmService(filmStorage, userStorage, validator);
     }
 
-    // Validate likes
-
-    @Test
-    void likeOnShouldBeExceptionForNotFoundUserId() {
-        assertThrows(NotFoundException.class, () -> filmService.likeOn(1L, 100L));
-    }
-
-    @Test
-    void likeOffShouldBeExceptionForNotFoundUserId() {
-        assertThrows(NotFoundException.class, () -> filmService.likeOff(1L, 100L));
-    }
-
     // Validate update
+
+    @Test
+    void updateShouldBeExceptionForNullId() {
+        final Film film = new Film(1L, "Name", "Description",
+                LocalDate.of(2000, 1, 1), 100);
+        filmStorage.create(film);
+        film.setId(null);
+
+        assertThrows(NotValidException.class, () -> filmService.update(film));
+    }
 
     @Test
     void updateShouldNotBeExceptionForAllCorrect() {
@@ -53,18 +51,9 @@ class FilmServiceTest {
         assertDoesNotThrow(() -> filmService.update(film));
     }
 
-    @Test
-    void updateShouldBeExceptionForNotCorrectId() {
-        final Film film = new Film(1L, "Name", "Description",
-                LocalDate.of(2000, 1, 1), 100);
-        filmStorage.create(film);
-        film.setId(10L);
-
-        assertThrows(NotFoundException.class, () -> filmService.update(film));
-    }
 
     @Test
-    void updateShouldBeExceptionFotNotCorrectFilmName() {
+    void updateShouldBeExceptionForNotCorrectFilmName() {
         final Film film = new Film(1L, "Name", "Description",
                 LocalDate.of(2000, 1, 1), 100);
         filmStorage.create(film);
@@ -101,5 +90,50 @@ class FilmServiceTest {
         film.setDuration(-1);
 
         assertThrows(NotValidException.class, () -> filmService.update(film));
+    }
+
+    // Not found exceptions
+
+    @Test
+    void updateShouldBeExceptionForNotCorrectId() {
+        final Film film = new Film(1L, "Name", "Description",
+                LocalDate.of(2000, 1, 1), 100);
+        filmStorage.create(film);
+        film.setId(100L);
+
+        assertThrows(NotFoundException.class, () -> filmService.update(film));
+    }
+
+    @Test
+    void findByIdShouldBeExceptionForNotFoundId() {
+        assertThrows(NotFoundException.class, () -> filmService.findById(100L));
+    }
+
+    @Test
+    void likeOnShouldBeExceptionForNotFoundFilmId() {
+        assertThrows(NotFoundException.class, () -> filmService.likeOn(100L, 1L));
+    }
+
+    @Test
+    void likeOnShouldBeExceptionForNotFoundUserId() {
+        final Film film = new Film(1L, "Name", "Description",
+                LocalDate.of(2000, 1, 1), 100);
+        filmStorage.create(film);
+
+        assertThrows(NotFoundException.class, () -> filmService.likeOn(1L, 100L));
+    }
+
+    @Test
+    void likeOffShouldBeExceptionForNotFoundId() {
+        assertThrows(NotFoundException.class, () -> filmService.likeOff(100L, 1L));
+    }
+
+    @Test
+    void likeOffShouldBeExceptionForNotFoundUserId() {
+        final Film film = new Film(1L, "Name", "Description",
+                LocalDate.of(2000, 1, 1), 100);
+        filmStorage.create(film);
+
+        assertThrows(NotFoundException.class, () -> filmService.likeOff(1L, 100L));
     }
 }

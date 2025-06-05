@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,7 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film findById(@PathVariable @NotNull Long id) {
+    public Film findById(@PathVariable Long id) {
         return filmService.findById(id);
     }
 
@@ -38,7 +37,7 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void likeOn(@PathVariable @NotNull Long id, @PathVariable @NotNull Long userId) {
+    public void likeOn(@PathVariable Long id, @PathVariable Long userId) {
         filmService.likeOn(id, userId);
     }
 

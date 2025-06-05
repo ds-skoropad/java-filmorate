@@ -54,7 +54,8 @@ class UserTest {
 
     @Test
     void createNotCorrectUserBirthdayShouldBeFuture() {
-        final User user = new User(1L, "test@email.ru", "login", "name", LocalDate.now().plusYears(1));
+        final User user = new User(1L, "test@email.ru", "login", "name",
+                LocalDate.now().plusYears(1));
         final Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertFalse(violations.isEmpty());
