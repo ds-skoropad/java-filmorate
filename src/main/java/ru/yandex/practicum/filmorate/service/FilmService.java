@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -30,17 +29,14 @@ public class FilmService {
             throw new NotValidException("Cannot be null: id = null");
         }
 
-        Optional<Film> currentFilm = filmStorage.findById(film.getId());
+        Film currentFilm = filmStorage.findById(film.getId()).orElseThrow(
+                () -> new NotFoundException(String.format("Film not found: id = %s", film.getId())));
 
-        if (currentFilm.isEmpty()) {
-            throw new NotFoundException(String.format("Film not found: id = %s", film.getId()));
-        }
-
-        if (film.getName() == null) film.setName(currentFilm.get().getName());
-        if (film.getDescription() == null) film.setDescription(currentFilm.get().getDescription());
-        if (film.getReleaseDate() == null) film.setReleaseDate(currentFilm.get().getReleaseDate());
-        if (film.getDuration() == 0) film.setDuration(currentFilm.get().getDuration());
-        film.getLikes().addAll(currentFilm.get().getLikes());
+        if (film.getName() == null) film.setName(currentFilm.getName());
+        if (film.getDescription() == null) film.setDescription(currentFilm.getDescription());
+        if (film.getReleaseDate() == null) film.setReleaseDate(currentFilm.getReleaseDate());
+        if (film.getDuration() == 0) film.setDuration(currentFilm.getDuration());
+        film.getLikes().addAll(currentFilm.getLikes());
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         if (!violations.isEmpty()) {
@@ -60,31 +56,23 @@ public class FilmService {
     }
 
     public Film findById(Long id) {
-        Optional<Film> film = filmStorage.findById(id);
-
-        if (film.isEmpty()) {
-            throw new NotFoundException(String.format("Film not found: id = %s", id));
-        }
-        return film.get();
+        return filmStorage.findById(id).orElseThrow(
+                () -> new NotFoundException(String.format("Film not found: id = %s", id)));
     }
 
     public void likeOn(Long filmId, Long userId) {
-        if (filmStorage.findById(filmId).isEmpty()) {
-            throw new NotFoundException(String.format("Film not found: id = %s", filmId));
-        }
-        if (userStorage.findById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("User not found: id = %s", userId));
-        }
+        filmStorage.findById(filmId).orElseThrow(
+                () -> new NotFoundException(String.format("Film not found: id = %s", filmId)));
+        userStorage.findById(userId).orElseThrow(
+                () -> new NotFoundException(String.format("User not found: id = %s", userId)));
         filmStorage.likeOn(filmId, userId);
     }
 
     public void likeOff(Long filmId, Long userId) {
-        if (filmStorage.findById(filmId).isEmpty()) {
-            throw new NotFoundException(String.format("Film not found: id = %s", filmId));
-        }
-        if (userStorage.findById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("User not found: id = %s", userId));
-        }
+        filmStorage.findById(filmId).orElseThrow(
+                () -> new NotFoundException(String.format("Film not found: id = %s", filmId)));
+        userStorage.findById(userId).orElseThrow(
+                () -> new NotFoundException(String.format("User not found: id = %s", userId)));
         filmStorage.likeOff(filmId, userId);
     }
 
