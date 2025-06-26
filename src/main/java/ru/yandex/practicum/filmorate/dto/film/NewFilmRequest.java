@@ -1,20 +1,19 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.film;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import ru.yandex.practicum.filmorate.dto.genre.GenreIdDto;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaIdDto;
 import ru.yandex.practicum.filmorate.valid.DateAfter;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor()
-public class Film {
-    private Long id;
+public class NewFilmRequest {
     @NotBlank
     private String name;
     @Size(max = 200)
@@ -23,5 +22,11 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private int mpaId;
+    @NotNull
+    private MpaIdDto mpa;
+    private Set<GenreIdDto> genres;
+
+    public boolean hasGenre() {
+        return genres != null;
+    }
 }

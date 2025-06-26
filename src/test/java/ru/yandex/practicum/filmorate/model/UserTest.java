@@ -13,18 +13,17 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
-
-    private Validator validator;
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    User user;
 
     @BeforeEach
     void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        user = new User(1L, "test@email.ru", "login", "name",
+                LocalDate.of(2000, 1, 1));
     }
 
     @Test
     void createAllCorrect() {
-        final User user = new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1));
         final Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertTrue(violations.isEmpty());
@@ -32,8 +31,7 @@ class UserTest {
 
     @Test
     void createNotCorrectEmail() {
-        final User user = new User(1L, "test-email.ru@", "login", "name",
-                LocalDate.of(2000, 1, 1));
+        user.setEmail("test-email.ru@");
         final Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertFalse(violations.isEmpty());
@@ -42,9 +40,8 @@ class UserTest {
     }
 
     @Test
-    void createNotCorrectLoginShouldBeBlank() {
-        final User user = new User(1L, "test@email.ru", " ", "name",
-                LocalDate.of(2000, 1, 1));
+    void createNotCorrectLoginShouldBeContainWhiteSpaces() {
+        user.setLogin("lo gin");
         final Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertFalse(violations.isEmpty());
@@ -54,8 +51,7 @@ class UserTest {
 
     @Test
     void createNotCorrectUserBirthdayShouldBeFuture() {
-        final User user = new User(1L, "test@email.ru", "login", "name",
-                LocalDate.now().plusYears(1));
+        user.setBirthday(LocalDate.now().plusYears(1));
         final Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertFalse(violations.isEmpty());

@@ -13,18 +13,17 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmTest {
-
-    private Validator validator;
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    Film film;
 
     @BeforeEach
     void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        film = new Film(1L, "Name", "Description",
+                LocalDate.of(2000, 1, 1), 100, 1);
     }
 
     @Test
     void createAllCorrect() {
-        final Film film = new Film(1L, "Name", "Description",
-                LocalDate.of(2000, 1, 1), 100);
         final Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertTrue(violations.isEmpty());
@@ -32,8 +31,7 @@ class FilmTest {
 
     @Test
     void createNotCorrectFilmNameShouldBeBlank() {
-        final Film film = new Film(1L, " ", "Description",
-                LocalDate.of(2000, 1, 1), 100);
+        film.setName(" ");
         final Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertFalse(violations.isEmpty());
@@ -43,8 +41,7 @@ class FilmTest {
 
     @Test
     void createNotCorrectFilmDescriptionShouldBeMoreLength200() {
-        final Film film = new Film(1L, "Name", "!".repeat(201),
-                LocalDate.of(2000, 1, 1), 100);
+        film.setDescription("!".repeat(201));
         final Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertFalse(violations.isEmpty());
@@ -54,8 +51,7 @@ class FilmTest {
 
     @Test
     void createNotCorrectFilmReleaseDateShouldBeBefore() {
-        final Film film = new Film(1L, "Name", "Description",
-                LocalDate.of(1895, 12, 27), 100);
+        film.setReleaseDate(LocalDate.of(1895, 12, 27));
         final Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertFalse(violations.isEmpty());
@@ -65,8 +61,7 @@ class FilmTest {
 
     @Test
     void createNotCorrectFilmDurationShouldBeNotPositive() {
-        final Film film = new Film(1L, "Name", "Description",
-                LocalDate.of(2000, 1, 1), 0);
+        film.setDuration(0);
         final Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertFalse(violations.isEmpty());
