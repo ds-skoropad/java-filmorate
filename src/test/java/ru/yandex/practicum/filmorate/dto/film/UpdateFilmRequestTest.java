@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.film;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
@@ -12,27 +12,27 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FilmTest {
+class UpdateFilmRequestTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    Film film;
+    UpdateFilmRequest updateFilmRequest;
 
     @BeforeEach
     void setUp() {
-        film = new Film(1L, "Name", "Description",
-                LocalDate.of(2000, 1, 1), 100, 1);
+        updateFilmRequest = new UpdateFilmRequest();
+        updateFilmRequest.setId(0L);
     }
 
     @Test
-    void createAllCorrect() {
-        final Set<ConstraintViolation<Film>> violations = validator.validate(film);
+    void allCorrect() {
+        final Set<ConstraintViolation<UpdateFilmRequest>> violations = validator.validate(updateFilmRequest);
 
         assertTrue(violations.isEmpty());
     }
 
     @Test
-    void createNotCorrectFilmNameShouldBeBlank() {
-        film.setName(" ");
-        final Set<ConstraintViolation<Film>> violations = validator.validate(film);
+    void notCorrectNameShouldBeBlank() {
+        updateFilmRequest.setName(" ");
+        final Set<ConstraintViolation<UpdateFilmRequest>> violations = validator.validate(updateFilmRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
@@ -40,9 +40,9 @@ class FilmTest {
     }
 
     @Test
-    void createNotCorrectFilmDescriptionShouldBeMoreLength200() {
-        film.setDescription("!".repeat(201));
-        final Set<ConstraintViolation<Film>> violations = validator.validate(film);
+    void notCorrectDescriptionShouldBeLengthMore200() {
+        updateFilmRequest.setDescription("!".repeat(201));
+        final Set<ConstraintViolation<UpdateFilmRequest>> violations = validator.validate(updateFilmRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
@@ -50,9 +50,9 @@ class FilmTest {
     }
 
     @Test
-    void createNotCorrectFilmReleaseDateShouldBeBefore() {
-        film.setReleaseDate(LocalDate.of(1895, 12, 27));
-        final Set<ConstraintViolation<Film>> violations = validator.validate(film);
+    void notCorrectReleaseDateShouldBeBefore() {
+        updateFilmRequest.setReleaseDate(LocalDate.of(1895, 12, 27));
+        final Set<ConstraintViolation<UpdateFilmRequest>> violations = validator.validate(updateFilmRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
@@ -60,9 +60,9 @@ class FilmTest {
     }
 
     @Test
-    void createNotCorrectFilmDurationShouldBeNotPositive() {
-        film.setDuration(0);
-        final Set<ConstraintViolation<Film>> violations = validator.validate(film);
+    void notCorrectDurationShouldBeNotPositive() {
+        updateFilmRequest.setDuration(0);
+        final Set<ConstraintViolation<UpdateFilmRequest>> violations = validator.validate(updateFilmRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());

@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.db.MpaDbStorage;
-import ru.yandex.practicum.filmorate.valid.ValidUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +68,6 @@ public class FilmService {
         Film currentFilm = filmStorage.findById(request.getId()).orElseThrow(
                 () -> new NotFoundException(String.format("Film not found: id = %s", request.getId())));
         Film commonFilm = FilmMapper.updateFilmFields(currentFilm, request);
-        ValidUtils.valid(commonFilm, validator); // Film model validation
 
         int mpaId = request.hasMpa() ? commonFilm.getMpaId() : currentFilm.getMpaId();
         mpa = mpaDbStorage.findById(mpaId).orElseThrow(

@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-import ru.yandex.practicum.filmorate.valid.ValidUtils;
 
 import java.util.Collection;
 
@@ -40,7 +39,6 @@ public class UserService {
         if (commonUser.getName().isBlank()) {
             commonUser.setName(commonUser.getLogin());
         }
-        ValidUtils.valid(commonUser, validator); // Valid User model
         currentUser = userStorage.update(commonUser);
         return UserMapper.mapToUserDto(currentUser);
     }

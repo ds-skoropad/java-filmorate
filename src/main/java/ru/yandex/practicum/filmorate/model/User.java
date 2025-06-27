@@ -1,8 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,11 +11,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class User {
     private Long id;
-    @Email
     private String email;
-    @Pattern(regexp = "\\S+")
     private String login;
     private String name;
-    @Past
     private LocalDate birthday;
 }

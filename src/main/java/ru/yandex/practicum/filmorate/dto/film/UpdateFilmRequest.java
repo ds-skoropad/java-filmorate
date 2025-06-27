@@ -1,9 +1,14 @@
 package ru.yandex.practicum.filmorate.dto.film;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.dto.genre.GenreIdDto;
 import ru.yandex.practicum.filmorate.dto.mpa.MpaIdDto;
+import ru.yandex.practicum.filmorate.valid.DateAfter;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -12,10 +17,18 @@ import java.util.Set;
 public class UpdateFilmRequest {
     @NotNull
     private Long id;
+    @Nullable
+    @Pattern(regexp = "^(?!\\s*$).+", message = "must not be blank") // @Nullable + @NotBlank not work
     private String name;
+    @Nullable
+    @Size(max = 200)
     private String description;
+    @Nullable
+    @DateAfter
     private LocalDate releaseDate;
-    private int duration;
+    @Nullable
+    @Positive
+    private Integer duration;
     private MpaIdDto mpa;
     private Set<GenreIdDto> genres;
 
@@ -42,5 +55,4 @@ public class UpdateFilmRequest {
     public boolean hasGenre() {
         return genres != null;
     }
-
 }
