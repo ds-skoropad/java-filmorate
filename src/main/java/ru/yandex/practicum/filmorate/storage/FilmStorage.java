@@ -15,10 +15,4 @@ public interface FilmStorage {
 
     Optional<Film> findById(Long id);
 
-    void likeOn(Long filmId, Long userId);
-
-    void likeOff(Long filmId, Long userId);
-
-    Collection<Film> findPopular(Long count);
-
 }

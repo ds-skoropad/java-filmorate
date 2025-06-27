@@ -1,0 +1,44 @@
+CREATE TABLE IF NOT EXISTS mpa (
+	mpa_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	name VARCHAR(40) NOT NULL
+	);
+
+CREATE TABLE IF NOT EXISTS genre (
+	genre_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	name VARCHAR(40) NOT NULL
+	);
+
+CREATE TABLE IF NOT EXISTS film (
+	film_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	name VARCHAR(100) NOT NULL,
+	description VARCHAR(200) NOT NULL,
+	release_date DATE NOT NULL,
+	duration INTEGER NOT NULL,
+	mpa_id INTEGER NOT NULL REFERENCES mpa(mpa_id)
+	);
+
+CREATE TABLE IF NOT EXISTS person (
+	person_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	email VARCHAR(255) NOT NULL,
+	login VARCHAR(40) NOT NULL,
+	name VARCHAR(40) NOT NULL,
+	birthday_date DATE NOT NULL
+	);
+
+CREATE TABLE IF NOT EXISTS film_genre (
+	film_id BIGINT NOT NULL REFERENCES film (film_id),
+	genre_id INTEGER NOT NULL REFERENCES genre (genre_id),
+	PRIMARY KEY (film_id, genre_id)
+	);
+
+CREATE TABLE IF NOT EXISTS popular (
+	film_id BIGINT NOT NULL REFERENCES film (film_id),
+	person_id BIGINT NOT NULL REFERENCES person (person_id),
+	PRIMARY KEY (film_id, person_id)
+	);
+
+CREATE TABLE IF NOT EXISTS friendship (
+	person_id BIGINT NOT NULL REFERENCES person (person_id),
+	friend_id BIGINT NOT NULL REFERENCES person (person_id),
+	PRIMARY KEY (person_id, friend_id)
+	);

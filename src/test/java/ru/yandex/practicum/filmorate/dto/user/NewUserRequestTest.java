@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.user;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
@@ -12,29 +12,29 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserTest {
-
-    private Validator validator;
+class NewUserRequestTest {
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    NewUserRequest newUserRequest;
 
     @BeforeEach
     void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        newUserRequest = new NewUserRequest();
+        newUserRequest.setEmail("email@domain.com");
+        newUserRequest.setLogin("login");
+        newUserRequest.setBirthday(LocalDate.now().minusYears(20));
     }
 
     @Test
-    void createAllCorrect() {
-        final User user = new User(1L, "test@email.ru", "login", "name",
-                LocalDate.of(2000, 1, 1));
-        final Set<ConstraintViolation<User>> violations = validator.validate(user);
+    void allCorrect() {
+        final Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(newUserRequest);
 
         assertTrue(violations.isEmpty());
     }
 
     @Test
-    void createNotCorrectEmail() {
-        final User user = new User(1L, "test-email.ru@", "login", "name",
-                LocalDate.of(2000, 1, 1));
-        final Set<ConstraintViolation<User>> violations = validator.validate(user);
+    void notCorrectEmail() {
+        newUserRequest.setEmail("test-email.ru@");
+        final Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(newUserRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
@@ -42,10 +42,9 @@ class UserTest {
     }
 
     @Test
-    void createNotCorrectLoginShouldBeBlank() {
-        final User user = new User(1L, "test@email.ru", " ", "name",
-                LocalDate.of(2000, 1, 1));
-        final Set<ConstraintViolation<User>> violations = validator.validate(user);
+    void notCorrectLoginShouldBeContainWhiteSpaces() {
+        newUserRequest.setLogin("lo gin");
+        final Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(newUserRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
@@ -53,10 +52,9 @@ class UserTest {
     }
 
     @Test
-    void createNotCorrectUserBirthdayShouldBeFuture() {
-        final User user = new User(1L, "test@email.ru", "login", "name",
-                LocalDate.now().plusYears(1));
-        final Set<ConstraintViolation<User>> violations = validator.validate(user);
+    void notCorrectBirthdayShouldBeFuture() {
+        newUserRequest.setBirthday(LocalDate.now().plusYears(1));
+        final Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(newUserRequest);
 
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());

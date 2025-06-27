@@ -1,0 +1,49 @@
+spring:
+  profiles:
+    active: production
+---
+# DEVELOPMENT
+spring:
+  config:
+    activate:
+      on-profile: development
+  main:
+    log-startup-info: true
+    banner-mode: off
+  datasource:
+    url: jdbc:h2:mem:filmorate
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  sql:
+    init:
+      mode: always # init src/main/resources schema.sql, data.sql
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    org:
+      zalando:
+        logbook: TRACE # view HTTP-request
+    ru:
+      yandex:
+        practicum:
+          filmorate: TRACE
+---
+# PRODUCTION
+spring:
+  config:
+    activate:
+      on-profile: production
+  main:
+    log-startup-info: false
+  datasource:
+    url: jdbc:h2:file:./db/filmorate
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  sql:
+    init:
+      mode: always # init src/main/resources schema.sql, data.sql
