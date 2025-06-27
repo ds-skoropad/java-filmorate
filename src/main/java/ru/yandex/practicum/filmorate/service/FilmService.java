@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.genre.GenreIdDto;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,7 +42,7 @@ public class FilmService {
 
         if (request.hasGenre()) {
             genreIds = request.getGenres().stream()
-                    .map(GenreIdDto::getId)
+                    .map(GenreDto::getId)
                     .toList();
             genres = getValidGenres(genreIds);
         } else {
@@ -52,30 +51,32 @@ public class FilmService {
         }
 
         Film film = FilmMapper.mapToFilm(request);
+        film.setMpa(mpa);
         film = filmStorage.create(film);
 
         if (request.hasGenre()) {
             filmGenreStorage.create(film.getId(), genreIds);
         }
 
-        return FilmMapper.mapToFilmDto(film, mpa, genres);
+        return FilmMapper.mapToFilmDto(film, genres);
     }
 
     public FilmDto update(UpdateFilmRequest request) {
         List<Genre> genres;
-        Mpa mpa;
 
         Film currentFilm = filmStorage.findById(request.getId()).orElseThrow(
                 () -> new NotFoundException(String.format("Film not found: id = %s", request.getId())));
         Film commonFilm = FilmMapper.updateFilmFields(currentFilm, request);
 
-        int mpaId = request.hasMpa() ? commonFilm.getMpaId() : currentFilm.getMpaId();
-        mpa = mpaDbStorage.findById(mpaId).orElseThrow(
-                () -> new NotFoundException(String.format("Mpa not found: id = %s", mpaId)));
-
+        if (request.hasMpa()) {
+            int mpaId = request.getMpa().getId();
+            Mpa mpa = mpaDbStorage.findById(mpaId).orElseThrow(
+                    () -> new NotFoundException(String.format("Mpa not found: id = %s", mpaId)));
+            commonFilm.setMpa(mpa);
+        }
         if (request.hasGenre()) {
             List<Integer> genreIds = request.getGenres().stream()
-                    .map(GenreIdDto::getId)
+                    .map(GenreDto::getId)
                     .toList();
             genres = getValidGenres(genreIds);
             filmGenreStorage.update(commonFilm.getId(), genreIds);
@@ -85,40 +86,22 @@ public class FilmService {
 
         currentFilm = filmStorage.update(commonFilm);
 
-        return FilmMapper.mapToFilmDto(currentFilm, mpa, genres);
+        return FilmMapper.mapToFilmDto(currentFilm, genres);
     }
 
     public Collection<FilmDto> findAll() {
-        List<FilmDto> filmsDto = new ArrayList<>();
-        Collection<Genre> genres;
-
         Collection<Film> films = filmStorage.findAll();
-        List<Integer> mpaIds = films.stream()
-                .map(Film::getMpaId)
-                .distinct()
-                .toList();
-        Map<Integer, Mpa> mpaMap = mpaDbStorage.findByManyId(mpaIds).stream()
-                .collect(Collectors.toMap(Mpa::getId, mpa -> mpa));
-
         Map<Long, List<Genre>> groupGenres = filmGenreStorage.findAllGenreGroupByFilmId();
 
-        for (Film film : films) {
-            Mpa mpa = mpaMap.get(film.getMpaId());
-            genres = groupGenres.containsKey(film.getId()) ? groupGenres.get(film.getId()) : List.of();
-            filmsDto.add(FilmMapper.mapToFilmDto(film, mpa, genres));
-        }
-
-        return filmsDto;
+        return getManyFilmDto(films, groupGenres);
     }
 
     public FilmDto findById(Long id) {
         Film film = filmStorage.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Film not found: id = %s", id)));
-        Mpa mpa = mpaDbStorage.findById(film.getMpaId()).orElseThrow(
-                () -> new NotFoundException(String.format("Mpa not found: id = %s", film.getMpaId())));
         Collection<Genre> genres = filmGenreStorage.findGenreByFilmId(id);
 
-        return FilmMapper.mapToFilmDto(film, mpa, genres);
+        return FilmMapper.mapToFilmDto(film, genres);
     }
 
     public void likeOn(Long filmId, Long userId) {
@@ -138,30 +121,13 @@ public class FilmService {
     }
 
     public Collection<FilmDto> findPopular(Long count) {
-        List<FilmDto> filmsDto = new ArrayList<>();
-        Collection<Genre> genres;
-
         Collection<Film> films = popularStorage.findPopular(count);
-        List<Integer> mpaIds = films.stream()
-                .map(Film::getMpaId)
-                .distinct()
-                .toList();
-        Map<Integer, Mpa> mpaMap = mpaDbStorage.findByManyId(mpaIds).stream()
-                .collect(Collectors.toMap(Mpa::getId, mpa -> mpa));
-
         List<Long> filmIds = films.stream()
                 .map(Film::getId)
                 .toList();
-
         Map<Long, List<Genre>> groupGenres = filmGenreStorage.findGenreGroupByFilmId(filmIds);
 
-        for (Film film : films) {
-            Mpa mpa = mpaMap.get(film.getMpaId());
-            genres = groupGenres.containsKey(film.getId()) ? groupGenres.get(film.getId()) : List.of();
-            filmsDto.add(FilmMapper.mapToFilmDto(film, mpa, genres));
-        }
-
-        return filmsDto;
+        return getManyFilmDto(films, groupGenres);
     }
 
     // Additional methods
@@ -178,5 +144,17 @@ public class FilmService {
             throw new NotFoundException(String.format("Genre not found: id = %s", diffGenreIds));
         }
         return genres;
+    }
+
+    private Collection<FilmDto> getManyFilmDto(Collection<Film> films, Map<Long, List<Genre>> groupGenres) {
+        Collection<FilmDto> filmsDto = new ArrayList<>();
+        Collection<Genre> genres;
+
+        for (Film film : films) {
+            genres = groupGenres.containsKey(film.getId()) ? groupGenres.get(film.getId()) : List.of();
+            filmsDto.add(FilmMapper.mapToFilmDto(film, genres));
+        }
+
+        return filmsDto;
     }
 }

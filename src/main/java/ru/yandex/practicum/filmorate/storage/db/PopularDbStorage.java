@@ -49,10 +49,13 @@ public class PopularDbStorage implements PopularStorage {
                     f.release_date,
                     f.duration,
                     f.mpa_id,
+                    m.name AS mpa_name,
                     COUNT(p.person_id) AS count_like
                 FROM popular AS p
                 INNER JOIN film AS f
                     ON p.film_id = f.film_id
+                LEFT OUTER JOIN mpa AS m
+                    ON f.mpa_id = m.mpa_id
                 GROUP BY p.film_id
                 ORDER BY count_like DESC
                 LIMIT ?

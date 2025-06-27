@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.db.mappers.FilmRowMapper;
 
 import java.time.LocalDate;
@@ -28,9 +29,17 @@ class FilmDbStorageTest {
     private final FilmRowMapper filmRowMapper;
 
     private final String sqlGetById = """
-            SELECT *
-            FROM film
-            WHERE film_id = ?
+                SELECT f.film_id,
+                    f.name,
+                    f.description,
+                    f.release_date,
+                    f.duration,
+                    f.mpa_id,
+                    m.name AS mpa_name
+                FROM film AS f
+                LEFT OUTER JOIN mpa AS m
+                    ON f.mpa_id = m.mpa_id
+                WHERE film_id = ?
             """;
 
     @BeforeEach
@@ -58,7 +67,7 @@ class FilmDbStorageTest {
     @Test
     void create() {
         final Film expectedFilm = new Film(0L, "new_name", "new_description", LocalDate.of(2004, 4, 4),
-                400, 4);
+                400, new Mpa(1, "G"));
         filmDbStorage.create(expectedFilm);
 
         final Film actualFilm = jdbcTemplate.queryForObject(sqlGetById, filmRowMapper, 4L);
@@ -70,7 +79,7 @@ class FilmDbStorageTest {
     @Test
     void update() {
         final Film expectedFilm = new Film(2L, "update_name", "update_description", LocalDate.of(2005, 5, 5),
-                400, 4);
+                400, new Mpa(1, "G"));
         filmDbStorage.update(expectedFilm);
 
         final Film actualFilm = jdbcTemplate.queryForObject(sqlGetById, filmRowMapper, 2L);

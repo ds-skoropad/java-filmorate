@@ -32,7 +32,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaId()
+                film.getMpa().getId()
         );
         film.setId(id);
         log.trace("Table film INSERT: {}", film);
@@ -51,7 +51,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaId(),
+                film.getMpa().getId(),
                 film.getId()
         );
         log.trace("Table film UPDATE: {}", film);
@@ -61,8 +61,16 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Collection<Film> findAll() {
         String sql = """
-                SELECT *
-                FROM film
+                SELECT f.film_id,
+                    f.name,
+                    f.description,
+                    f.release_date,
+                    f.duration,
+                    f.mpa_id,
+                    m.name AS mpa_name
+                FROM film AS f
+                LEFT OUTER JOIN mpa AS m
+                    ON f.mpa_id = m.mpa_id
                 """;
         return baseFindMany(sql);
     }
@@ -70,8 +78,16 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Optional<Film> findById(Long filmId) {
         String sql = """
-                SELECT *
-                FROM film
+                SELECT f.film_id,
+                    f.name,
+                    f.description,
+                    f.release_date,
+                    f.duration,
+                    f.mpa_id,
+                    m.name AS mpa_name
+                FROM film AS f
+                LEFT OUTER JOIN mpa AS m
+                    ON f.mpa_id = m.mpa_id
                 WHERE film_id = ?
                 """;
         return baseFindOne(sql, filmId);

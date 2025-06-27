@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.dto.genre.GenreIdDto;
-import ru.yandex.practicum.filmorate.dto.mpa.MpaIdDto;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.valid.DateAfter;
 
 import java.time.LocalDate;
@@ -29,8 +29,8 @@ public class UpdateFilmRequest {
     @Nullable
     @Positive
     private Integer duration;
-    private MpaIdDto mpa;
-    private Set<GenreIdDto> genres;
+    private MpaDto mpa;
+    private Set<GenreDto> genres;
 
     public boolean hasName() {
         return name != null;

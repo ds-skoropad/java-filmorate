@@ -13,4 +13,11 @@ public final class MpaMapper {
         dto.setName(mpa.getName());
         return dto;
     }
+
+    public static Mpa mapToMpa(MpaDto mpaDto) {
+        Mpa mpa = new Mpa();
+        mpa.setId(mpaDto.getId());
+        mpa.setName(mpaDto.getName());
+        return mpa;
+    }
 }

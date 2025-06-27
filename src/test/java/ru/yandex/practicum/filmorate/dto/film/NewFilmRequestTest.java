@@ -6,7 +6,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.dto.mpa.MpaIdDto;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -24,7 +24,7 @@ class NewFilmRequestTest {
         newFilmRequest.setDescription("description");
         newFilmRequest.setReleaseDate(LocalDate.of(2000, 1, 1));
         newFilmRequest.setDuration(100);
-        newFilmRequest.setMpa(new MpaIdDto());
+        newFilmRequest.setMpa(new MpaDto());
         newFilmRequest.getMpa().setId(1);
     }
 
