@@ -11,11 +11,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = DateAfterValidator.class)
 public @interface DateAfter {
-    String message() default "Дата должна быть после {value}";
+
+    String message() default "Date must be after {value}";
 
     Class<?>[] groups() default {};
 
     Class<?>[] payload() default {};
 
     String value() default "1895-12-28";
+
 }
