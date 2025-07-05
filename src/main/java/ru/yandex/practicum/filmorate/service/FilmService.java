@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,20 +24,19 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    private final Validator validator;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final MpaDbStorage mpaDbStorage;
     private final GenreStorage genreStorage;
     private final FilmGenreStorage filmGenreStorage;
-    private final PopularStorage popularStorage;
+    private final FilmLikeStorage filmLikeStorage;
 
     public FilmDto create(NewFilmRequest request) {
         List<Genre> genres;
         List<Integer> genreIds;
 
         Mpa mpa = mpaDbStorage.findById(request.getMpa().getId()).orElseThrow(
-                () -> new NotFoundException(String.format("Mpa not found: id = %s", request.getMpa().getId())));
+                () -> new NotFoundException(String.format("Mpa not found: id = %d", request.getMpa().getId())));
 
         if (request.hasGenre()) {
             genreIds = request.getGenres().stream()
@@ -65,13 +63,13 @@ public class FilmService {
         List<Genre> genres;
 
         Film currentFilm = filmStorage.findById(request.getId()).orElseThrow(
-                () -> new NotFoundException(String.format("Film not found: id = %s", request.getId())));
+                () -> new NotFoundException(String.format("Film not found: id = %d", request.getId())));
         Film commonFilm = FilmMapper.updateFilmFields(currentFilm, request);
 
         if (request.hasMpa()) {
             int mpaId = request.getMpa().getId();
             Mpa mpa = mpaDbStorage.findById(mpaId).orElseThrow(
-                    () -> new NotFoundException(String.format("Mpa not found: id = %s", mpaId)));
+                    () -> new NotFoundException(String.format("Mpa not found: id = %d", mpaId)));
             commonFilm.setMpa(mpa);
         }
         if (request.hasGenre()) {
@@ -98,7 +96,7 @@ public class FilmService {
 
     public FilmDto findById(Long id) {
         Film film = filmStorage.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Film not found: id = %s", id)));
+                () -> new NotFoundException(String.format("Film not found: id = %d", id)));
         Collection<Genre> genres = filmGenreStorage.findGenreByFilmId(id);
 
         return FilmMapper.mapToFilmDto(film, genres);
@@ -106,22 +104,22 @@ public class FilmService {
 
     public void likeOn(Long filmId, Long userId) {
         filmStorage.findById(filmId).orElseThrow(
-                () -> new NotFoundException(String.format("Film not found: id = %s", filmId)));
+                () -> new NotFoundException(String.format("Film not found: id = %d", filmId)));
         userStorage.findById(userId).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", userId)));
-        popularStorage.likeOn(filmId, userId);
+                () -> new NotFoundException(String.format("User not found: id = %d", userId)));
+        filmLikeStorage.likeOn(filmId, userId);
     }
 
     public void likeOff(Long filmId, Long userId) {
         filmStorage.findById(filmId).orElseThrow(
-                () -> new NotFoundException(String.format("Film not found: id = %s", filmId)));
+                () -> new NotFoundException(String.format("Film not found: id = %d", filmId)));
         userStorage.findById(userId).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", userId)));
-        popularStorage.likeOff(filmId, userId);
+                () -> new NotFoundException(String.format("User not found: id = %d", userId)));
+        filmLikeStorage.likeOff(filmId, userId);
     }
 
     public Collection<FilmDto> findPopular(Long count) {
-        Collection<Film> films = popularStorage.findPopular(count);
+        Collection<Film> films = filmLikeStorage.findPopular(count);
         List<Long> filmIds = films.stream()
                 .map(Film::getId)
                 .toList();
@@ -138,7 +136,7 @@ public class FilmService {
                 .map(Genre::getId)
                 .toList();
         List<Integer> diffGenreIds = genreIds.stream()
-                .filter(g -> !validGenreIds.contains(g))
+                .filter(genreId -> !validGenreIds.contains(genreId))
                 .toList();
         if (!diffGenreIds.isEmpty()) {
             throw new NotFoundException(String.format("Genre not found: id = %s", diffGenreIds));

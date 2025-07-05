@@ -23,7 +23,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     @Override
     public User create(User user) {
         String sql = """
-                INSERT INTO person (email, login, name, birthday_date)
+                INSERT INTO users (email, login, name, birthday_date)
                 VALUES (?, ?, ?, ?)
                 """;
         Long id = baseInsert(
@@ -34,15 +34,15 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
                 user.getBirthday()
         );
         user.setId(id);
-        log.trace("Database: person INSERT: {}", user);
+        log.trace("DB: INSERT INTO users: {}", user);
         return user;
     }
 
     @Override
     public User update(User user) {
         String sql = """
-                UPDATE person SET email = ?, login = ?, name = ?, birthday_date = ?
-                WHERE person_id = ?
+                UPDATE users SET email = ?, login = ?, name = ?, birthday_date = ?
+                WHERE user_id = ?
                 """;
         baseUpdate(
                 sql,
@@ -52,7 +52,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
                 user.getBirthday(),
                 user.getId()
         );
-        log.trace("Database: person UPDATE: {}", user);
+        log.trace("DB: UPDATE users: {}", user);
         return user;
     }
 
@@ -60,7 +60,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     public Collection<User> findAll() {
         String sql = """
                 SELECT *
-                FROM person
+                FROM users
                 """;
         return baseFindMany(sql);
     }
@@ -69,8 +69,8 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     public Optional<User> findById(Long userId) {
         String sql = """
                 SELECT *
-                FROM person
-                WHERE person_id = ?
+                FROM users
+                WHERE user_id = ?
                 """;
         return baseFindOne(sql, userId);
     }

@@ -36,7 +36,7 @@ class FilmDbStorageTest {
                     f.duration,
                     f.mpa_id,
                     m.name AS mpa_name
-                FROM film AS f
+                FROM films AS f
                 LEFT OUTER JOIN mpa AS m
                     ON f.mpa_id = m.mpa_id
                 WHERE film_id = ?
@@ -45,7 +45,7 @@ class FilmDbStorageTest {
     @BeforeEach
     void setUp() {
         String sqlUp = """
-                INSERT INTO film
+                INSERT INTO films
                     (name, description, release_date, duration, mpa_id)
                 VALUES
                     ('name1', 'description1', '2001-01-01', 100, 1),
@@ -58,8 +58,8 @@ class FilmDbStorageTest {
     @AfterEach
     void tearDown() {
         String sqlDown = """
-                DELETE FROM film;
-                ALTER TABLE film ALTER COLUMN film_id RESTART WITH 1;
+                DELETE FROM films;
+                ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1;
                 """;
         jdbcTemplate.update(sqlDown);
     }

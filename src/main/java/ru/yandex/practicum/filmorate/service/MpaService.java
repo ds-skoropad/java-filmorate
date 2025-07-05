@@ -26,6 +26,6 @@ public class MpaService {
         return mpaStorage.findById(id)
                 .map(MpaMapper::mapToMpaDto)
                 .orElseThrow(
-                        () -> new NotFoundException(String.format("MPA not found: id=%s", id)));
+                        () -> new NotFoundException(String.format("MPA not found: id=%d", id)));
     }
 }

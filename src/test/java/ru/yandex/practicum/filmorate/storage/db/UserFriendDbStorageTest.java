@@ -21,16 +21,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({FriendshipDbStorage.class, UserRowMapper.class})
-class FriendshipDbStorageTest {
+@Import({UserFriendDbStorage.class, UserRowMapper.class})
+class UserFriendDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
-    private final FriendshipDbStorage friendshipDbStorage;
-    private final UserRowMapper userRowMapper;
+    private final UserFriendDbStorage userFriendDbStorage;
 
     @BeforeEach
     void setUp() {
         String sqlUp = """
-                INSERT INTO person
+                INSERT INTO users
                     (email, login, name, birthday_date)
                 VALUES
                     ('user1@domain.com', 'login1', 'name1', '2001-01-01'),
@@ -43,42 +42,42 @@ class FriendshipDbStorageTest {
     @AfterEach
     void tearDown() {
         String sqlDown = """
-                DELETE FROM friendship;
-                DELETE FROM person;
-                ALTER TABLE person ALTER COLUMN person_id RESTART WITH 1;
+                DELETE FROM user_friends;
+                DELETE FROM users;
+                ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;
                 """;
         jdbcTemplate.update(sqlDown);
     }
 
     @Test
     void friendAdd() {
-        friendshipDbStorage.friendAdd(1L, 2L);
+        userFriendDbStorage.friendAdd(1L, 2L);
         String sql = """
                 SELECT *
-                FROM friendship
+                FROM user_friends
                 """;
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
 
         assertThat(result)
                 .hasSize(1)
                 .first()
-                .hasToString("{PERSON_ID=1, FRIEND_ID=2}");
+                .hasToString("{USER_ID=1, FRIEND_ID=2}");
     }
 
     @Test
     void friendRemove() {
         String sqlFriendAdd = """
-                INSERT INTO friendship
-                    (person_id, friend_id)
+                INSERT INTO user_friends
+                    (user_id, friend_id)
                 VALUES
                     (1, 2);
                 """;
         jdbcTemplate.update(sqlFriendAdd);
 
-        friendshipDbStorage.friendRemove(1L, 2L);
+        userFriendDbStorage.friendRemove(1L, 2L);
         String sql = """
                 SELECT *
-                FROM friendship
+                FROM user_friends
                 """;
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
 
@@ -89,8 +88,8 @@ class FriendshipDbStorageTest {
     @Test
     void friendFindAll() {
         String sqlFriendAdd = """
-                INSERT INTO friendship
-                    (person_id, friend_id)
+                INSERT INTO user_friends
+                    (user_id, friend_id)
                 VALUES
                     (1, 2),
                     (1, 3),
@@ -101,7 +100,7 @@ class FriendshipDbStorageTest {
                 """;
         jdbcTemplate.update(sqlFriendAdd);
 
-        Collection<User> friends = friendshipDbStorage.friendFindAll(1L);
+        Collection<User> friends = userFriendDbStorage.friendFindAll(1L);
 
         assertThat(friends)
                 .hasSize(2)
@@ -112,8 +111,8 @@ class FriendshipDbStorageTest {
     @Test
     void friendCommon() {
         String sqlFriendAdd = """
-                INSERT INTO friendship
-                    (person_id, friend_id)
+                INSERT INTO user_friends
+                    (user_id, friend_id)
                 VALUES
                     (1, 2),
                     (1, 3),
@@ -124,7 +123,7 @@ class FriendshipDbStorageTest {
                 """;
         jdbcTemplate.update(sqlFriendAdd);
 
-        Collection<User> commonFriends = friendshipDbStorage.friendCommon(1L, 2L);
+        Collection<User> commonFriends = userFriendDbStorage.friendCommon(1L, 2L);
 
         assertThat(commonFriends)
                 .hasSize(1)

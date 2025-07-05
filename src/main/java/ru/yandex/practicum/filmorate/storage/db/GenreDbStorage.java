@@ -24,7 +24,7 @@ public class GenreDbStorage extends BaseDbStorage<Genre> implements GenreStorage
     public Collection<Genre> findAll() {
         String sql = """
                 SELECT *
-                FROM genre
+                FROM genres
                 """;
         return baseFindMany(sql);
     }
@@ -33,7 +33,7 @@ public class GenreDbStorage extends BaseDbStorage<Genre> implements GenreStorage
     public Optional<Genre> findById(int genreId) {
         String sql = """
                 SELECT *
-                FROM genre
+                FROM genres
                 WHERE genre_id = ?
                 """;
         return baseFindOne(sql, genreId);
@@ -43,7 +43,7 @@ public class GenreDbStorage extends BaseDbStorage<Genre> implements GenreStorage
     public Collection<Genre> findByManyId(List<Integer> genreIds) {
         String sql = """
                 SELECT *
-                FROM genre
+                FROM genres
                 WHERE genre_id IN (%s)
                 """;
         String inSql = String.join(",", Collections.nCopies(genreIds.size(), "?"));

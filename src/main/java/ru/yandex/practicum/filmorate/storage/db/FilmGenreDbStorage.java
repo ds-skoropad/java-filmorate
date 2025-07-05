@@ -42,7 +42,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     @Override
     public void create(Long filmId, List<Integer> genreIds) {
         String sql = """
-                INSERT INTO film_genre (film_id, genre_id)
+                INSERT INTO film_genres (film_id, genre_id)
                 VALUES (?, ?)
                 """;
         if (!genreIds.isEmpty()) {
@@ -55,15 +55,15 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
                         ps.setInt(2, genreId);
 
                     });
-            log.trace("TABLE film_genre INSERT: film_id = {}, genreIds = {}", filmId, genreIds);
+            log.trace("DB: INSERT INTO film_genres: film_id = {}, genreIds = {}", filmId, genreIds);
         }
     }
 
     @Override
-    public List<Integer> update(Long filmId, List<Integer> genreIds) {
+    public void update(Long filmId, List<Integer> genreIds) {
         String sql = """
                 SELECT genre_id
-                FROM film_genre
+                FROM film_genres
                 WHERE film_id = ?
                 """;
 
@@ -83,14 +83,13 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
             create(filmId, insertGenreIds);
         }
 
-        log.trace("TABLE film_genre UPDATE: film_id = {}, genreIds = {}", filmId, genreIds);
-        return genreIds;
+        log.trace("DB: UPDATE film_genres: film_id = {}, genreIds = {}", filmId, genreIds);
     }
 
     @Override
     public void delete(Long filmId, List<Integer> genreIds) {
         String sql = """
-                DELETE FROM film_genre
+                DELETE FROM film_genres
                 WHERE film_id = ?
                     AND genre_id IN (%s)
                 """;
@@ -99,7 +98,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
         Stream<Long> params = Stream.concat(Stream.of(filmId), genreIds.stream().map(Long::valueOf));
 
         jdbcTemplate.update(String.format(sql, inSql), params.toArray());
-        log.trace("TABLE film_genre DELETE: film_id = {}, genreIds = {}", filmId, genreIds);
+        log.trace("DB: DELETE FROM film_genres: film_id = {}, genreIds = {}", filmId, genreIds);
     }
 
     @Override
@@ -108,8 +107,8 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
                 SELECT fg.film_id,
                     g.genre_id,
                     g.name
-                FROM film_genre AS fg
-                LEFT JOIN genre AS g
+                FROM film_genres AS fg
+                LEFT JOIN genres AS g
                     ON fg.genre_id = g.genre_id
                 """;
         return jdbcTemplate.query(sql, mapExtractor);
@@ -121,8 +120,8 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
                 SELECT fg.film_id,
                     g.genre_id,
                     g.name
-                FROM film_genre AS fg
-                LEFT JOIN genre AS g
+                FROM film_genres AS fg
+                LEFT JOIN genres AS g
                     ON fg.genre_id = g.genre_id
                 WHERE fg.film_id IN (%s)
                 """;
@@ -135,10 +134,10 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     public Collection<Genre> findGenreByFilmId(Long filmId) {
         String sql = """
                 SELECT *
-                FROM genre
+                FROM genres
                 WHERE genre_id IN (
                     SELECT genre_id
-                    FROM film_genre
+                    FROM film_genres
                     WHERE film_id = ?
                 )
                 """;

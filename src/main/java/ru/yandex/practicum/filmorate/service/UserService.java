@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
@@ -10,7 +9,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotValidException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
+import ru.yandex.practicum.filmorate.storage.UserFriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
@@ -18,9 +17,8 @@ import java.util.Collection;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final Validator validator;
     private final UserStorage userStorage;
-    private final FriendshipStorage friendshipStorage;
+    private final UserFriendStorage userFriendStorage;
 
     public UserDto create(NewUserRequest request) {
         if (request.getName().isBlank()) {
@@ -53,48 +51,48 @@ public class UserService {
         return userStorage.findById(id)
                 .map(UserMapper::mapToUserDto)
                 .orElseThrow(
-                        () -> new NotFoundException(String.format("User not found: id=%s", id)));
+                        () -> new NotFoundException(String.format("User not found: id=%d", id)));
     }
 
     public void friendAdd(Long id, Long friendId) {
         userStorage.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", id)));
+                () -> new NotFoundException(String.format("User not found: id = %d", id)));
         userStorage.findById(friendId).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", friendId)));
+                () -> new NotFoundException(String.format("User not found: id = %d", friendId)));
         if (id.equals(friendId)) {
-            throw new NotValidException(String.format("Same id: id=%s, friendId=%s", id, friendId));
+            throw new NotValidException(String.format("Same id: id=%d, friendId=%d", id, friendId));
         }
-        friendshipStorage.friendAdd(id, friendId);
+        userFriendStorage.friendAdd(id, friendId);
     }
 
     public void friendRemove(Long id, Long friendId) {
         userStorage.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", id)));
+                () -> new NotFoundException(String.format("User not found: id = %d", id)));
         userStorage.findById(friendId).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", friendId)));
+                () -> new NotFoundException(String.format("User not found: id = %d", friendId)));
         if (id.equals(friendId)) {
-            throw new NotValidException(String.format("Same id: id=%s, friendId=%s", id, friendId));
+            throw new NotValidException(String.format("Same id: id=%d, friendId=%d", id, friendId));
         }
-        friendshipStorage.friendRemove(id, friendId);
+        userFriendStorage.friendRemove(id, friendId);
     }
 
     public Collection<UserDto> friendFindAll(Long id) {
         userStorage.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", id)));
-        return friendshipStorage.friendFindAll(id).stream()
+                () -> new NotFoundException(String.format("User not found: id = %d", id)));
+        return userFriendStorage.friendFindAll(id).stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
     }
 
     public Collection<UserDto> friendCommon(Long id, Long otherId) {
         userStorage.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", id)));
+                () -> new NotFoundException(String.format("User not found: id = %d", id)));
         userStorage.findById(otherId).orElseThrow(
-                () -> new NotFoundException(String.format("User not found: id = %s", otherId)));
+                () -> new NotFoundException(String.format("User not found: id = %d", otherId)));
         if (id.equals(otherId)) {
-            throw new NotValidException(String.format("Same id: id=%s, otherId=%s", id, otherId));
+            throw new NotValidException(String.format("Same id: id=%d, otherId=%d", id, otherId));
         }
-        return friendshipStorage.friendCommon(id, otherId).stream()
+        return userFriendStorage.friendCommon(id, otherId).stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
     }

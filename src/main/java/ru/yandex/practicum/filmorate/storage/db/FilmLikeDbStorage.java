@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.PopularStorage;
+import ru.yandex.practicum.filmorate.storage.FilmLikeStorage;
 
 import java.util.Collection;
 
@@ -15,29 +15,29 @@ import java.util.Collection;
 @Primary
 @Repository
 @RequiredArgsConstructor
-public class PopularDbStorage implements PopularStorage {
+public class FilmLikeDbStorage implements FilmLikeStorage {
     private final JdbcTemplate jdbc;
     private final RowMapper<Film> filmRowMapper;
 
     @Override
     public void likeOn(Long filmId, Long userId) {
         String sql = """
-                INSERT INTO popular (film_id, person_id)
+                INSERT INTO film_likes (film_id, user_id)
                 VALUES (?, ?)
                 """;
         jdbc.update(sql, filmId, userId);
-        log.trace("Table popular INSERT: film_id = {}, user_id = {}", filmId, userId);
+        log.trace("DB: INSERT INTO film_likes: film_id = {}, user_id = {}", filmId, userId);
     }
 
     @Override
     public void likeOff(Long filmId, Long userId) {
         String sql = """
-                DELETE FROM popular
+                DELETE FROM film_likes
                 WHERE film_id = ?
-                    AND person_id = ?
+                    AND user_id = ?
                 """;
         jdbc.update(sql, filmId, userId);
-        log.trace("Table popular DELETE: film_id = {}, user_id = {}", filmId, userId);
+        log.trace("DB: DELETE FROM film_likes: film_id = {}, user_id = {}", filmId, userId);
     }
 
     @Override
@@ -50,9 +50,9 @@ public class PopularDbStorage implements PopularStorage {
                     f.duration,
                     f.mpa_id,
                     m.name AS mpa_name,
-                    COUNT(p.person_id) AS count_like
-                FROM popular AS p
-                INNER JOIN film AS f
+                    COUNT(p.user_id) AS count_like
+                FROM film_likes AS p
+                INNER JOIN films AS f
                     ON p.film_id = f.film_id
                 LEFT OUTER JOIN mpa AS m
                     ON f.mpa_id = m.mpa_id

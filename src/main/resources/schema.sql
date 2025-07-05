@@ -3,12 +3,12 @@ CREATE TABLE IF NOT EXISTS mpa (
 	name VARCHAR(40) NOT NULL
 	);
 
-CREATE TABLE IF NOT EXISTS genre (
+CREATE TABLE IF NOT EXISTS genres (
 	genre_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	name VARCHAR(40) NOT NULL
 	);
 
-CREATE TABLE IF NOT EXISTS film (
+CREATE TABLE IF NOT EXISTS films (
 	film_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	name VARCHAR(100) NOT NULL,
 	description VARCHAR(200) NOT NULL,
@@ -17,28 +17,28 @@ CREATE TABLE IF NOT EXISTS film (
 	mpa_id INTEGER NOT NULL REFERENCES mpa(mpa_id)
 	);
 
-CREATE TABLE IF NOT EXISTS person (
-	person_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users (
+	user_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	email VARCHAR(255) NOT NULL,
 	login VARCHAR(40) NOT NULL,
 	name VARCHAR(40) NOT NULL,
 	birthday_date DATE NOT NULL
 	);
 
-CREATE TABLE IF NOT EXISTS film_genre (
-	film_id BIGINT NOT NULL REFERENCES film (film_id),
-	genre_id INTEGER NOT NULL REFERENCES genre (genre_id),
+CREATE TABLE IF NOT EXISTS film_genres (
+	film_id BIGINT NOT NULL REFERENCES films (film_id),
+	genre_id INTEGER NOT NULL REFERENCES genres (genre_id),
 	PRIMARY KEY (film_id, genre_id)
 	);
 
-CREATE TABLE IF NOT EXISTS popular (
-	film_id BIGINT NOT NULL REFERENCES film (film_id),
-	person_id BIGINT NOT NULL REFERENCES person (person_id),
-	PRIMARY KEY (film_id, person_id)
+CREATE TABLE IF NOT EXISTS film_likes (
+	film_id BIGINT NOT NULL REFERENCES films (film_id),
+	user_id BIGINT NOT NULL REFERENCES users (user_id),
+	PRIMARY KEY (film_id, user_id)
 	);
 
-CREATE TABLE IF NOT EXISTS friendship (
-	person_id BIGINT NOT NULL REFERENCES person (person_id),
-	friend_id BIGINT NOT NULL REFERENCES person (person_id),
-	PRIMARY KEY (person_id, friend_id)
+CREATE TABLE IF NOT EXISTS user_friends (
+	user_id BIGINT NOT NULL REFERENCES users (user_id),
+	friend_id BIGINT NOT NULL REFERENCES users (user_id),
+	PRIMARY KEY (user_id, friend_id)
 	);

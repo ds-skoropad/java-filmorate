@@ -26,6 +26,6 @@ public class GenreService {
         return genreStorage.findById(id)
                 .map(GenreMapper::mapToGenreDto)
                 .orElseThrow(
-                        () -> new NotFoundException(String.format("Genre not found: id=%s", id)));
+                        () -> new NotFoundException(String.format("Genre not found: id=%d", id)));
     }
 }

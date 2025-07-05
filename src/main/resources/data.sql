@@ -14,7 +14,7 @@ WHERE NOT EXISTS (
 );
 
 -- add genres
-INSERT INTO genre (name)
+INSERT INTO genres (name)
 SELECT *
 FROM (
     VALUES ('Комедия'),
@@ -26,5 +26,5 @@ FROM (
     ) data
 WHERE NOT EXISTS (
     SELECT NULL
-    FROM genre
+    FROM genres
 );

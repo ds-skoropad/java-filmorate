@@ -29,14 +29,14 @@ class UserDbStorageTest {
 
     private static final String SQL_USER_GET_BY_ID = """
             SELECT *
-            FROM person
-            WHERE person_id = ?
+            FROM users
+            WHERE user_id = ?
             """;
 
     @BeforeEach
     void setUp() {
         String sqlUp = """
-                INSERT INTO person
+                INSERT INTO users
                     (email, login, name, birthday_date)
                 VALUES
                     ('user1@domain.com', 'login1', 'name1', '2001-01-01'),
@@ -49,8 +49,8 @@ class UserDbStorageTest {
     @AfterEach
     void tearDown() {
         String sqlDown = """
-                DELETE FROM person;
-                ALTER TABLE person ALTER COLUMN person_id RESTART WITH 1;
+                DELETE FROM users;
+                ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;
                 """;
         jdbcTemplate.update(sqlDown);
     }

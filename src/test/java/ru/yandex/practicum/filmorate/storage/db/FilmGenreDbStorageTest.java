@@ -25,24 +25,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FilmGenreDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     private final FilmGenreDbStorage filmGenreDbStorage;
-    private final GenreRowMapper genreRowMapper;
 
     private static final String SQL_FIND_BY_FILM_ID = """
             SELECT genre_id
-            FROM film_genre
+            FROM film_genres
             WHERE film_id = ?
             """;
 
     @BeforeEach
     void setUp() {
         String sqlUp = """
-                INSERT INTO film
+                INSERT INTO films
                     (name, description, release_date, duration, mpa_id)
                 VALUES
                     ('name1', 'description1', '2001-01-01', 100, 1),
                     ('name2', 'description2', '2002-01-01', 200, 2),
                     ('name3', 'description3', '2003-01-01', 300, 3);
-                INSERT INTO film_genre
+                INSERT INTO film_genres
                     (film_id, genre_id)
                 VALUES
                     (1, 1),
@@ -57,9 +56,9 @@ class FilmGenreDbStorageTest {
     @AfterEach
     void tearDown() {
         String sqlDown = """
-                DELETE FROM film_genre;
-                DELETE FROM film;
-                ALTER TABLE film ALTER COLUMN film_id RESTART WITH 1;
+                DELETE FROM film_genres;
+                DELETE FROM films;
+                ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1;
                 """;
         jdbcTemplate.update(sqlDown);
     }

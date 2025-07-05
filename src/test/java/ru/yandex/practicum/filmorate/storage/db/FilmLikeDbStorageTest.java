@@ -21,22 +21,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({PopularDbStorage.class, FilmRowMapper.class})
-class PopularDbStorageTest {
+@Import({FilmLikeDbStorage.class, FilmRowMapper.class})
+class FilmLikeDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
-    private final PopularDbStorage popularDbStorage;
-    private final FilmRowMapper filmRowMapper;
+    private final FilmLikeDbStorage filmLikeDbStorage;
 
     @BeforeEach
     void setUp() {
         String sqlUp = """
-                INSERT INTO film
+                INSERT INTO films
                     (name, description, release_date, duration, mpa_id)
                 VALUES
                     ('name1', 'description1', '2001-01-01', 100, 1),
                     ('name2', 'description2', '2002-01-01', 200, 2),
                     ('name3', 'description3', '2003-01-01', 300, 3);
-                INSERT INTO person
+                INSERT INTO users
                     (email, login, name, birthday_date)
                 VALUES
                     ('user1@domain.com', 'login1', 'name1', '2001-01-01'),
@@ -49,44 +48,44 @@ class PopularDbStorageTest {
     @AfterEach
     void tearDown() {
         String sqlDown = """
-                DELETE FROM popular;
-                DELETE FROM film;
-                ALTER TABLE film ALTER COLUMN film_id RESTART WITH 1;
-                DELETE FROM person;
-                ALTER TABLE person ALTER COLUMN person_id RESTART WITH 1;
+                DELETE FROM film_likes;
+                DELETE FROM films;
+                ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1;
+                DELETE FROM users;
+                ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;
                 """;
         jdbcTemplate.update(sqlDown);
     }
 
     @Test
     void likeOn() {
-        popularDbStorage.likeOn(1L, 1L);
+        filmLikeDbStorage.likeOn(1L, 1L);
         String sql = """
                 SELECT *
-                FROM popular
+                FROM film_likes
                 """;
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
 
         assertThat(result)
                 .hasSize(1)
                 .first()
-                .hasToString("{FILM_ID=1, PERSON_ID=1}");
+                .hasToString("{FILM_ID=1, USER_ID=1}");
     }
 
     @Test
     void likeOff() {
         String sqlLikeOn = """
-                INSERT INTO popular
-                    (film_id, person_id)
+                INSERT INTO film_likes
+                    (film_id, user_id)
                 VALUES
                     (1, 1);
                 """;
         jdbcTemplate.update(sqlLikeOn);
 
-        popularDbStorage.likeOff(1L, 1L);
+        filmLikeDbStorage.likeOff(1L, 1L);
         String sql = """
                 SELECT *
-                FROM popular
+                FROM film_likes
                 """;
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
 
@@ -97,8 +96,8 @@ class PopularDbStorageTest {
     @Test
     void findPopular() {
         String sqlLikeOn = """
-                INSERT INTO popular
-                    (film_id, person_id)
+                INSERT INTO film_likes
+                    (film_id, user_id)
                 VALUES
                     (3, 1),
                     (3, 2),
@@ -109,14 +108,14 @@ class PopularDbStorageTest {
                 """;
         jdbcTemplate.update(sqlLikeOn);
 
-        Collection<Film> popular100 = popularDbStorage.findPopular(100L);
+        Collection<Film> popular100 = filmLikeDbStorage.findPopular(100L);
 
         assertThat(popular100)
                 .hasSize(3)
                 .extracting(Film::getName)
                 .containsExactly("name2", "name3", "name1");
 
-        Collection<Film> popular2 = popularDbStorage.findPopular(2L);
+        Collection<Film> popular2 = filmLikeDbStorage.findPopular(2L);
 
         assertThat(popular2)
                 .hasSize(2)

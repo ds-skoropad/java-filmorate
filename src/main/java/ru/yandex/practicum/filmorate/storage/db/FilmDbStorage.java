@@ -23,7 +23,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Film create(Film film) {
         String sql = """
-                INSERT INTO film (name, description, release_date, duration, mpa_id)
+                INSERT INTO films (name, description, release_date, duration, mpa_id)
                 VALUES (?, ?, ?, ?, ?)
                 """;
         Long id = baseInsert(
@@ -35,14 +35,14 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getMpa().getId()
         );
         film.setId(id);
-        log.trace("Table film INSERT: {}", film);
+        log.trace("DB: INSERT INTO films: {}", film);
         return film;
     }
 
     @Override
     public Film update(Film film) {
         String sql = """
-                UPDATE film SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?
+                UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?
                 WHERE film_id = ?
                 """;
         baseUpdate(
@@ -54,7 +54,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId()
         );
-        log.trace("Table film UPDATE: {}", film);
+        log.trace("DB: UPDATE films: {}", film);
         return film;
     }
 
@@ -68,7 +68,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                     f.duration,
                     f.mpa_id,
                     m.name AS mpa_name
-                FROM film AS f
+                FROM films AS f
                 LEFT OUTER JOIN mpa AS m
                     ON f.mpa_id = m.mpa_id
                 """;
@@ -85,7 +85,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                     f.duration,
                     f.mpa_id,
                     m.name AS mpa_name
-                FROM film AS f
+                FROM films AS f
                 LEFT OUTER JOIN mpa AS m
                     ON f.mpa_id = m.mpa_id
                 WHERE film_id = ?

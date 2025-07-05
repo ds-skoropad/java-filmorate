@@ -10,7 +10,7 @@ public interface FilmGenreStorage {
 
     void create(Long filmId, List<Integer> genreIds);
 
-    List<Integer> update(Long filmId, List<Integer> genreIds);
+    void update(Long filmId, List<Integer> genreIds);
 
     void delete(Long filmId, List<Integer> genreIds);
 
@@ -19,4 +19,5 @@ public interface FilmGenreStorage {
     Map<Long, List<Genre>> findAllGenreGroupByFilmId();
 
     Map<Long, List<Genre>> findGenreGroupByFilmId(List<Long> filmIds);
+
 }
